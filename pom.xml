@@ -5,13 +5,199 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.aujee</groupId>
-    <artifactId>sundew</artifactId>
+    <artifactId>sundew-parent</artifactId>
     <version>1.0-SNAPSHOT</version>
 
+    <name>Sundew</name>
+    <description>Simple processor for creating and initializing configuration files.</description>
+    <url>http://github.com/aujee84/sundew/</url>
+
+    <packaging>pom</packaging>
+
+    <modules>
+        <module>sundew-client</module>
+        <module>sundew-services</module>
+        <module>sundew-processor</module>
+    </modules>
+
     <properties>
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <java.version>20</java.version>
+
+        <auto-service.version>1.1.0</auto-service.version>
+        <javapoet.version>1.13.0</javapoet.version>
+        <snakeyaml.version>2.0</snakeyaml.version>
+
+        <project.scm.id>github</project.scm.id>
+
+        <properties-maven-plugin>1.1.0</properties-maven-plugin>
+        <maven-compiler-plugin>3.10.1</maven-compiler-plugin>
+        <maven-toolchains-plugin>3.1.0</maven-toolchains-plugin>
+        <maven-surefire-plugin>3.0.0</maven-surefire-plugin>
+        <maven-javadoc-plugin>3.5.0</maven-javadoc-plugin>
+        <maven-source-plugin>3.2.1</maven-source-plugin>
+        <maven-gpg-plugin>3.0.1</maven-gpg-plugin>
+        <maven-failsafe-plugin>3.1.0</maven-failsafe-plugin>
+        <maven-enforcer-plugin>3.3.0</maven-enforcer-plugin>
+        <maven-jar-plugin>3.3.0</maven-jar-plugin>
+        <maven-shade-plugin>3.4.1</maven-shade-plugin>
     </properties>
-    
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>com.google.auto.service</groupId>
+                <artifactId>auto-service</artifactId>
+                <version>${auto-service.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.squareup</groupId>
+                <artifactId>javapoet</artifactId>
+                <version>${javapoet.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.yaml</groupId>
+                <artifactId>snakeyaml</artifactId>
+                <version>${snakeyaml.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>${maven-compiler-plugin}</version>
+                    <configuration>
+                        <release>${java.version}</release>
+                        <encoding>UTF-8</encoding>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-enforcer-plugin</artifactId>
+                    <version>${maven-enforcer-plugin}</version>
+                    <executions>
+                        <execution>
+                            <id>enforce</id>
+                            <goals>
+                                <goal>enforce</goal>
+                            </goals>
+                            <configuration>
+                                <rules>
+                                    <requireMavenVersion>
+                                        <version>3.0</version>
+                                        <message>Invalid Maven version. It should, at least, be 3.0</message>
+                                    </requireMavenVersion>
+                                    <requireJavaVersion>
+                                        <version>20</version>
+                                        <message>Invalid Java version. It should, at least, be 20</message>
+                                    </requireJavaVersion>
+                                    <banDuplicatePomDependencyVersions/>
+                                </rules>
+                            </configuration>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-jar-plugin</artifactId>
+                    <version>${maven-jar-plugin}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <version>${maven-surefire-plugin}</version>
+                </plugin>
+<!--                <plugin>-->
+<!--                    <groupId>org.apache.maven.plugins</groupId>-->
+<!--                    <artifactId>maven-shade-plugin</artifactId>-->
+<!--                    <version>${maven-shade-plugin}</version>-->
+<!--                    <executions>-->
+<!--                        <execution>-->
+<!--                            <phase>package</phase>-->
+<!--                            <goals>-->
+<!--                                <goal>shade</goal>-->
+<!--                            </goals>-->
+<!--                        </execution>-->
+<!--                    </executions>-->
+<!--                    <configuration>-->
+<!--                        <shadedArtifactAttached>true</shadedArtifactAttached>-->
+<!--                        <shadedClassifierName>jar-with-dependencies</shadedClassifierName>-->
+<!--                        <filters>-->
+<!--                            <filter>-->
+<!--                                <artifact>*:*</artifact>-->
+<!--                                <excludes>-->
+<!--                                    <exclude>module-info.class</exclude>-->
+<!--                                </excludes>-->
+<!--                            </filter>-->
+<!--                        </filters>-->
+<!--                    </configuration>-->
+<!--                </plugin>-->
+            </plugins>
+        </pluginManagement>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+            </plugin>
+<!--            <plugin>-->
+<!--                <groupId>org.apache.maven.plugins</groupId>-->
+<!--                <artifactId>maven-gpg-plugin</artifactId>-->
+<!--                <version>${maven-gpg-plugin}</version>-->
+<!--                <executions>-->
+<!--                    <execution>-->
+<!--                        <id>sign-artifacts</id>-->
+<!--                        <phase>verify</phase>-->
+<!--                        <goals>-->
+<!--                            <goal>sign</goal>-->
+<!--                        </goals>-->
+<!--                    </execution>-->
+<!--                </executions>-->
+<!--            </plugin>-->
+        </plugins>
+    </build>
+
+    <organization>
+        <name>AujeeFactory</name>
+    </organization>
+
+    <developers>
+        <developer>
+            <id>aujee</id>
+            <url>https://github.com/aujee84/</url>
+        </developer>
+    </developers>
+
+    <licenses>
+        <license>
+            <name>The Apache Software License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <distributionManagement>
+        <snapshotRepository>
+            <id>ossrh</id>
+            <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
+        </snapshotRepository>
+        <repository>
+            <id>ossrh</id>
+            <url>https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+        </repository>
+    </distributionManagement>
+
+    <scm>
+        <url>https://github.com/aujee84/sundew/</url>
+        <connection>scm:git:https://github.com/aujee84/sundew.git</connection>
+        <developerConnection>scm:git:https://github.com/aujee84/sundew.git</developerConnection>
+        <tag>HEAD</tag>
+    </scm>
+
+    <issueManagement>
+        <system>GitHub Issues</system>
+        <url>https://github.com/aujee84/sundew/issues</url>
+    </issueManagement>
 </project>
