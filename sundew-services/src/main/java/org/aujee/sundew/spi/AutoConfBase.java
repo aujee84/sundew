@@ -98,17 +98,17 @@ public final class AutoConfBase implements AutoInitializerProvider {
     private String extractValue(String line) {
         int indexOfColonSign = line.indexOf(":");
         int indexOfEqualSign = line.indexOf("=");
-        int thatIndex;
+        int beforeValueIndex;
         if (indexOfEqualSign == -1) {
-            thatIndex = indexOfColonSign;
+            beforeValueIndex = indexOfColonSign;
         } else if (indexOfColonSign == -1) {
-            thatIndex = indexOfEqualSign;
+            beforeValueIndex = indexOfEqualSign;
         } else {
-            thatIndex = Math.min(indexOfEqualSign, indexOfColonSign);
+            beforeValueIndex = Math.min(indexOfEqualSign, indexOfColonSign);
         }
         int optionalInlineCommentIndex = line.lastIndexOf("#");
         String value = optionalInlineCommentIndex == -1 ?
-                line.substring(thatIndex + 1) : line.substring(thatIndex + 1, optionalInlineCommentIndex);
+                line.substring(beforeValueIndex + 1) : line.substring(beforeValueIndex + 1, optionalInlineCommentIndex);
 
         return value.strip();
     }
@@ -151,27 +151,4 @@ public final class AutoConfBase implements AutoInitializerProvider {
     }
 }
 
-
-//        MethodHandles.Lookup LOOKUP = MethodHandles.lookup();
-//        InitializerFunc initializer;
-//        try {
-//            Class<?> targetClass = Class.forName("org.aujee.sundew.autogencore.AutoConfig");
-//            MethodHandles.Lookup privateLockup = MethodHandles.privateLookupIn(targetClass, LOOKUP);
-//            MethodHandle aStatic = privateLockup.findStatic(targetClass, "initialize", MethodType.methodType(void.class));
-//
-//            CallSite site = LambdaMetafactory.metafactory(
-//                    LOOKUP,
-//                    "initialize",
-//                    MethodType.methodType(InitializerFunc.class),
-//                    MethodType.methodType(void.class),
-//                    aStatic,
-//                    MethodType.methodType(void.class)
-//            );
-//            initializer = (InitializerFunc) site.getTarget().invoke();
-//
-//        } catch (Throwable e) {
-//            System.err.println(UtilBucket.getRootCause(e).getMessage());
-//            throw new RuntimeException(e);
-//        }
-//        initializer.initialize();
 

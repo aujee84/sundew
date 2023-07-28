@@ -1,9 +1,11 @@
 package org.aujee.sundew.processor;
 
 import com.google.auto.service.AutoService;
-import org.aujee.sundew.api.annotations.AutoConfigure;
+import org.aujee.sundew.api.annotations.AutoConf;
+import org.aujee.sundew.api.annotations.AutoJson;
 import org.aujee.sundew.api.annotations.AutoProperties;
-import org.aujee.sundew.api.annotations.Configurable;
+import org.aujee.sundew.api.annotations.AutoToml;
+import org.aujee.sundew.api.annotations.AutoYaml;
 import org.aujee.sundew.processor.support.SourceDestiny;
 import org.aujee.sundew.processor.support.SupportDispatcher;
 
@@ -28,9 +30,11 @@ import java.util.stream.Collectors;
 public class StartUpProcessor extends AbstractProcessor {
 
     private static final Set<Class<? extends Annotation>> SUPPORTED_ANNOTATIONS = Set.of(
-            Configurable.class,
-            AutoConfigure.class,
-            AutoProperties.class);
+            AutoProperties.class,
+            AutoYaml.class,
+            AutoToml.class,
+            AutoConf.class,
+            AutoJson.class);
 
     private static ProcessingEnvironment processingEnvironment;
     private static Messager messager;
@@ -108,6 +112,7 @@ public class StartUpProcessor extends AbstractProcessor {
                                 annotation.getSimpleName())));
             }
         } catch (RuntimeException e) {
+            messager.printError(getRootCause(e).getMessage());
             throw new RuntimeException("Terminating...");
         }
 

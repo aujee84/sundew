@@ -12,17 +12,17 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
- * Thread safe. Only filler is a shared resource.
+ * Thread safe policy assumes that SourceBuilder object will be used only by one thread.
+ * - JavaFile (thread confined) won't be a shared resource. Only filler is a shared resource.
  */
 public final class SourceBuilder {
     private static final Lock FILLER_LOCK = new ReentrantLock();
-    private static Filer filer = null;
+    private static final Filer FILER = ProcEnvironment.ON_INIT.filer();
     private JavaFile javaFile;
 
     private SourceBuilder() {}
 
     public static SourceBuilder create() {
-        filer = ProcEnvironment.ON_INIT.filer();
         return new SourceBuilder();
     }
 
@@ -36,7 +36,7 @@ public final class SourceBuilder {
                                   CharSequence relativeName) throws IOException {
         FILLER_LOCK.lock();
         try {
-            return filer.createResource(location, moduleAndPkg, relativeName);
+            return FILER.createResource(location, moduleAndPkg, relativeName);
         } finally {
             FILLER_LOCK.unlock();
         }
@@ -45,7 +45,7 @@ public final class SourceBuilder {
     public void writeToFiler() throws IOException {
         FILLER_LOCK.lock();
         try {
-            javaFile.writeTo(filer);
+            javaFile.writeTo(FILER);
         } finally {
             FILLER_LOCK.unlock();
         }

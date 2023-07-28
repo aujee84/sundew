@@ -14,7 +14,6 @@ public abstract class SupportDispatcher implements ProcessAble {
         String annotationName = clazz.getSimpleName();
 
         return switch (annotationName) {
-//            case "Configurable" -> ConfigurableSupport.provideSupport(elements);
             case "AutoConfigure", "AutoProperties", "AutoYaml" -> FileWriterDispatcher.provideSupport(elements, clazz);
             default -> throw new IllegalStateException(String.format(
                     "Unsupported annotation type: @%s.", annotationName));
