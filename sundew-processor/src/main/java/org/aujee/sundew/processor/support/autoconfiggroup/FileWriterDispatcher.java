@@ -9,7 +9,6 @@ import org.aujee.sundew.processor.support.SupportDispatcher;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.VariableElement;
-import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -28,15 +27,18 @@ public final class FileWriterDispatcher extends SupportDispatcher implements Cla
     public static SupportDispatcher provideSupport(final Set<? extends Element> elements,
                                                    final Class<? extends Annotation> supportedAnnotation) {
         DataClassWriterExecutor.prepare();
+        DataClassWriterExecutor.incrementExecuteCalls();
         return new FileWriterDispatcher(elements, supportedAnnotation);
     }
 
     @Override
-    public boolean generate() {
+    public boolean generate() throws RuntimeException {
         try {
             generated = toHandle.create();
-            DataClassWriterExecutor.execute();
-        } catch (IOException e) {
+            if (generated) {
+                DataClassWriterExecutor.execute();
+            }
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
         return generated;

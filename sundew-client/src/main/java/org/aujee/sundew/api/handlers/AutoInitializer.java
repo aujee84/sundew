@@ -15,7 +15,8 @@ public interface AutoInitializer {
         public static void initialize() {
             ServiceLoader<AutoInitializerProvider> loader = ServiceLoader.load(AutoInitializerProvider.class);
             AutoInitializerProvider provider = loader.findFirst().orElseThrow(() -> new ServiceConfigurationError(
-                    "Unable to load AutoInitializerProvider service."));
+                    "Unable to load AutoInitializerProvider service. Probably service not present on classpath. " +
+                            "Check your dependencies. "));
             provider.initialize();
         }
     }

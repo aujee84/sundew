@@ -65,8 +65,4 @@ public final class UtilBucket {
     public static Class<?> getType(String type) {
         return SUPPORTED_TYPE_MAPPER.get(type);
     }
-
-    public static boolean isString(String typeName) {
-        return "String".equals(typeName);
-    }
 }

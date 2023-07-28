@@ -25,11 +25,12 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 class DataClassWriterExecutor {
-    private static final Lock COMPARE_LOCK = new ReentrantLock();
+    private static final Lock FINISH_LOCK = new ReentrantLock();
     private static final AtomicInteger TO_CREATE_FILE_COUNTER = new AtomicInteger(0);
-    private static final AtomicInteger CREATED_CODEBLOCK_COUNTER = new AtomicInteger(0);
+    private static final AtomicInteger EXECUTE_CALLS_COUNTER = new AtomicInteger(0);
+    private static final AtomicInteger CREATED_CODEBLOCKS_COUNTER = new AtomicInteger(0);
     private static final AtomicBoolean NOT_PREPARED = new AtomicBoolean(true);
-    private static final AtomicBoolean NOT_EXECUTED = new AtomicBoolean(true);
+
     private static final Queue<Map.Entry<String, List<String[]>>> forInitData = new ConcurrentLinkedQueue<>();
     private static final Queue<Map.Entry<String, int[]>> valueIndex = new ConcurrentLinkedQueue<>();
 
@@ -39,7 +40,11 @@ class DataClassWriterExecutor {
     }
 
     static void incrementCodeBlockTaskCount() {
-        CREATED_CODEBLOCK_COUNTER.getAndIncrement();
+        CREATED_CODEBLOCKS_COUNTER.getAndIncrement();
+    }
+
+    static void incrementExecuteCalls() {
+        EXECUTE_CALLS_COUNTER.getAndIncrement();
     }
 
     static void addData(Map.Entry<String, List<String[]>> dataEntry) {
@@ -65,23 +70,26 @@ class DataClassWriterExecutor {
     }
 
     static void execute() throws IOException {
-        if (NOT_EXECUTED.compareAndSet(true, false)) {
-            AtomicBoolean notCompleted = new AtomicBoolean(true);
-            ExecutorService executorService = Executors.newFixedThreadPool(2);
-            while (notCompleted.get()) {
+        boolean completed;
+        try (ExecutorService executorService = Executors.newFixedThreadPool(2)) {
+            do {
                 executorService.submit(DataClassWriter::dataCodeBlockTask);
                 executorService.submit(DataClassWriter::indexCodeBlockTask);
-                COMPARE_LOCK.lock();
-                try {
-                    notCompleted.compareAndSet(true, TO_CREATE_FILE_COUNTER.get() != CREATED_CODEBLOCK_COUNTER.get());
-                } finally {
-                    COMPARE_LOCK.unlock();
-                }
+
+                completed = TO_CREATE_FILE_COUNTER.get() == CREATED_CODEBLOCKS_COUNTER.get();
+            } while (!completed);
+        }
+        EXECUTE_CALLS_COUNTER.getAndDecrement();
+        FINISH_LOCK.lock();
+        try {
+            if (EXECUTE_CALLS_COUNTER.get() == 0) {
+                DataClassWriter.finish();
             }
-            executorService.close();
-            DataClassWriter.finish();
+        } finally {
+            FINISH_LOCK.unlock();
         }
     }
+
     private static class DataClassWriter {
         private static final String CLASS_DESTINY = "org.aujee.sundew.spi";
         private static final String CLASS_NAME = "AutoConfig";
