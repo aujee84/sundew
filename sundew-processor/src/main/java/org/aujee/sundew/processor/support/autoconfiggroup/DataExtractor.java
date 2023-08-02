@@ -88,12 +88,13 @@ class DataExtractor {
         return elementDataContainer;
     }
 
-    private List<String[]> extractElementData(List<VariableElement> elements, boolean withDefaults,
+    private List<String[]> extractElementData(List<VariableElement> elements,
+                                              boolean withDefaults,
                                               Function<VariableElement, String> customBranchExtractor) {
         return elements.stream()
                 .map(element -> {
                     String[] dataArray = new String[4];
-                    dataArray[0] = element.getEnclosingElement().asType().toString();//enclosing class cannonical name
+                    dataArray[0] = element.getEnclosingElement().asType().toString();//enclosing class canonical name
                     dataArray[1] = element.getSimpleName().toString();//variable name
                     String type = element.asType().toString();//variable type
                     int optionalLastDot = type.lastIndexOf(".");

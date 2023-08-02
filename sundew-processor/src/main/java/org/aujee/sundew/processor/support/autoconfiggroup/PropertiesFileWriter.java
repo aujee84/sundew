@@ -1,14 +1,12 @@
 package org.aujee.sundew.processor.support.autoconfiggroup;
 
 import org.aujee.sundew.api.annotations.AutoProperties;
-import org.aujee.sundew.processor.ProcEnvironment;
 import org.aujee.sundew.processor.ProcLogger;
 import org.aujee.sundew.processor.support.CreateAble;
 import org.aujee.sundew.processor.support.SourceBuilder;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.VariableElement;
-import javax.lang.model.util.Elements;
 import javax.tools.FileObject;
 import javax.tools.StandardLocation;
 import java.io.BufferedWriter;
@@ -21,13 +19,19 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-class PropertiesFileWriter implements CreateAble, ClassWriterExecutable {
-    private static final Elements ELEMENT_UTILS = ProcEnvironment.ON_INIT.elementUtils();
+final class PropertiesFileWriter extends BaseFileWriter implements CreateAble{
+    private static final Function<VariableElement, String> FILE_NAME_EXTRACTOR = element
+            -> element.getAnnotation(AutoProperties.class).fileName();
+    private static final Function<VariableElement, String> CUSTOM_BRANCH_EXTRACTOR = element
+            -> element.getAnnotation(AutoProperties.class).customBranch();
+    private static final Predicate<VariableElement> BRANCH_NAMING_SPLITTER = element
+            -> element.getAnnotation(AutoProperties.class).defaultBranching();
     private static final Class<? extends Annotation> SUPPORTS = AutoProperties.class;
-    private final Map<String, Map.Entry<Boolean, List<String[]>>> elementDataContainer;
+    private static final String FILE_SUFFIX = ".properties";
 
-    static PropertiesFileWriter getWriter(Set<? extends Element> properElements) {
-        return new PropertiesFileWriter(properElements);
+
+    PropertiesFileWriter(Set<? extends Element> properElements) {
+        super(properElements, FILE_NAME_EXTRACTOR, BRANCH_NAMING_SPLITTER, CUSTOM_BRANCH_EXTRACTOR);
     }
 
     @Override
@@ -40,7 +44,7 @@ class PropertiesFileWriter implements CreateAble, ClassWriterExecutable {
         boolean created = false;
 
         for (Map.Entry<String, Map.Entry<Boolean, List<String[]>>> containerEntry : elementDataContainer.entrySet()) {
-            String fileName = containerEntry.getKey() + ".properties";
+            String fileName = containerEntry.getKey() + FILE_SUFFIX;
 
             FileObject file = SourceBuilder
                     .create()
@@ -50,10 +54,11 @@ class PropertiesFileWriter implements CreateAble, ClassWriterExecutable {
 
             Map.Entry<Boolean, List<String[]>> perFileData = containerEntry.getValue();
             List<String[]> elementData = perFileData.getValue();
+            int[] index = new int[elementData.size()];
+
+            boolean defaultBranching = perFileData.getKey();
 
             AtomicInteger startIndex = new AtomicInteger(0);
-            int[] index = new int[elementData.size()];
-            boolean defaultBranching = perFileData.getKey();
 
             if (defaultBranching) {
                 elementData.forEach(element -> {
@@ -95,18 +100,10 @@ class PropertiesFileWriter implements CreateAble, ClassWriterExecutable {
         return created;
     }
 
-    private PropertiesFileWriter(Set<? extends Element> properElements) {
-        Function<VariableElement, String> fileNameExtractor =
-                element -> element.getAnnotation(AutoProperties.class).fileName();
-        Function<VariableElement, String> customBranchExtractor =
-                element -> element.getAnnotation(AutoProperties.class).customBranch();
-        Predicate<VariableElement> branchNamingSplitter =
-                element -> element.getAnnotation(AutoProperties.class).defaultBranching();
-        elementDataContainer = new DataExtractor().getData(
-                properElements,
-                fileNameExtractor,
-                branchNamingSplitter,
-                customBranchExtractor,
-                ELEMENT_UTILS);
+    @Override
+    BranchWritingProcedure<List<String[]>> getProcedure(final BufferedWriter bufferedWriter,
+                                                        final List<String[]> elementData,
+                                                        final int[] index) {
+        return null;
     }
 }

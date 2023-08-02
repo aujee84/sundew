@@ -18,6 +18,7 @@ import javax.annotation.processing.SupportedSourceVersion;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
+import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.util.HashSet;
 import java.util.Map;
@@ -89,7 +90,7 @@ public class StartUpProcessor extends AbstractProcessor {
                     try {
                         rolledErrorSet.add(Map.entry(support.getDestiny(), support));
                         processed = support.generate();
-                    } catch (Exception e) {
+                    } catch (IOException e) {
                         messager.printError(String.format(
                                 "Error processing @%s. Root cause: %s",
                                 support.getAnnotation().getSimpleName(), getRootCause(e).getMessage()));
@@ -113,7 +114,7 @@ public class StartUpProcessor extends AbstractProcessor {
             }
         } catch (RuntimeException e) {
             messager.printError(getRootCause(e).getMessage());
-            throw new RuntimeException("Terminating...");
+            throw new RuntimeException("Terminating...", e);
         }
 
         return true;

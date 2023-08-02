@@ -24,8 +24,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+/**
+ *
+ */
 class DataClassWriterExecutor {
     private static final Lock FINISH_LOCK = new ReentrantLock();
+
     private static final AtomicInteger TO_CREATE_FILE_COUNTER = new AtomicInteger(0);
     private static final AtomicInteger EXECUTE_CALLS_COUNTER = new AtomicInteger(0);
     private static final AtomicInteger CREATED_CODEBLOCKS_COUNTER = new AtomicInteger(0);
